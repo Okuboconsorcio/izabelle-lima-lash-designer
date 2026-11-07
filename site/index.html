@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Izabelle Lima · Agendamento</title>
+  <meta name="description" content="Agende seu horário de sobrancelha, buço e cílios com Izabelle Lima — Lash Designer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+  <header class="top">
+    <a href="#" class="brand" aria-label="Izabelle Lima">
+      <span class="brand-mono script">il</span>
+      <span class="brand-text">
+        <span class="brand-name" data-studio>IZABELLE LIMA</span>
+        <span class="brand-sub script" data-subtitle>Lash Designer</span>
+      </span>
+    </a>
+    <a href="#agendar" class="btn btn-primary btn-sm">Agendar</a>
+  </header>
+
+  <section class="hero">
+    <div class="hero-photo" role="img" aria-label="Pinça e escovinha de cílios"></div>
+    <div class="hero-text">
+      <h1><span class="script hero-script">Agende</span><span class="hero-caps">seu horário</span></h1>
+      <p class="muted">Escolha o serviço, o dia e o horário que preferir. Em menos de um minuto seu horário fica reservado.</p>
+      <a href="#agendar" class="btn btn-primary">Ver horários disponíveis</a>
+    </div>
+  </section>
+
+  <main id="agendar" class="booking">
+    <ol class="steps" aria-label="Etapas do agendamento">
+      <li data-step="1" class="active"><span>1</span>Serviço</li>
+      <li data-step="2"><span>2</span>Dia e horário</li>
+      <li data-step="3"><span>3</span>Seus dados</li>
+    </ol>
+
+    <!-- 1. Serviço -->
+    <section class="panel" data-panel="1">
+      <div class="panel-title">
+        <span class="script">Tabela</span><span class="caps">de preços</span>
+      </div>
+      <p class="muted center">Toque no serviço que deseja agendar.</p>
+      <div id="service-list" class="price-table"></div>
+    </section>
+
+    <!-- 2. Dia e horário -->
+    <section class="panel hidden" data-panel="2">
+      <div class="chosen" id="chosen-service"></div>
+      <div class="when">
+        <div>
+          <h2 class="h-step">Escolha o dia</h2>
+          <div id="calendar"></div>
+          <p class="tiny muted legend-cal"><span class="dot on"></span> com horário livre &nbsp; <span class="dot off"></span> sem horário</p>
+        </div>
+        <div>
+          <h2 class="h-step" id="slots-title">Escolha o horário</h2>
+          <div id="slots"><p class="empty">Selecione um dia no calendário.</p></div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" data-back="1">‹ Trocar serviço</button>
+        <button class="btn btn-primary" id="to-3" disabled>Continuar</button>
+      </div>
+    </section>
+
+    <!-- 3. Dados -->
+    <section class="panel hidden" data-panel="3">
+      <div class="summary" id="summary"></div>
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="f-name">Seu nome</label>
+          <input class="input" id="f-name" autocomplete="name" required placeholder="Como podemos te chamar?">
+        </div>
+        <div class="field">
+          <label for="f-phone">WhatsApp</label>
+          <input class="input" id="f-phone" inputmode="tel" autocomplete="tel" required placeholder="(00) 00000-0000">
+          <span class="hint">Usamos só para confirmar ou avisar sobre seu horário.</span>
+        </div>
+        <div class="field">
+          <label for="f-notes">Observação <span class="muted">(opcional)</span></label>
+          <textarea class="input" id="f-notes" placeholder="Ex.: tenho alergia a…, é minha primeira vez…"></textarea>
+        </div>
+        <div class="nav-row">
+          <button type="button" class="btn btn-ghost" data-back="2">‹ Voltar</button>
+          <button type="submit" class="btn btn-primary">Confirmar agendamento</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 4. Pronto -->
+    <section class="panel hidden done" data-panel="4">
+      <div class="done-icon">✓</div>
+      <h2><span class="script" style="font-size:3.2rem">Agendado!</span></h2>
+      <div class="summary" id="done-summary"></div>
+      <p class="muted">Seu horário já está reservado. Se precisar remarcar ou cancelar, fale com a gente pelo WhatsApp.</p>
+      <div class="done-actions">
+        <a class="btn btn-wa hidden" id="wa-confirm" target="_blank" rel="noopener"></a>
+        <a class="btn" id="gcal" target="_blank" rel="noopener"></a>
+        <button class="btn btn-ghost" id="again">Fazer outro agendamento</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <span class="script">il</span>
+      <span class="caps" data-studio>Izabelle Lima</span>
+    </div>
+    <div class="foot-info" id="foot-info"></div>
+    <a href="admin.html" class="foot-admin">Área da profissional</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0/dist/umd/supabase.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/site.js"></script>
+</body>
+</html>

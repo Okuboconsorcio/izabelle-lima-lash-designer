@@ -1,0 +1,13 @@
+# Segredos e vínculos locais da Vercel CLI
+.env*
+.vercel/
+site/.env*
+site/.vercel/
+
+# Configurações locais do Claude/editor
+.claude/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
