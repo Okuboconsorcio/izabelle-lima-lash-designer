@@ -187,6 +187,7 @@ Colocados em 27/10/2026 e migrados para o Data-NTO; marcados para sair de uma ve
 | O quê | Quantidade | Marcação |
 |---|---|---|
 | Clientes de 26 a 30/10 (nomes e telefones inventados) | 20 (1 cancelado, 2 "não veio") | `source = 'exemplo'` |
+| Clientes de 16 a 28/11, para ver a Agenda em calendário (colocados em 17/11/2026) | 56 (1 cancelado, 1 "não veio") | `source = 'exemplo'` |
 | Materiais | 13 (5 na lista de compras) | `exemplo = true` |
 | Compras de outubro | 9 (R$ 486,80) | `exemplo = true` |
 
@@ -211,6 +212,7 @@ Eles **contam no financeiro e ocupam horários no site**. Para remover: `banco/0
 | 06/11/2026 | Código enviado ao GitHub (`Okuboconsorcio/izabelle-lima-lash-designer`) |
 | 17/11/2026 | Nicolas@okuboconsorcio.com.br virou dono do painel no Data-NTO; o painel volta sozinho para "Entrar" quando o e-mail já tem conta |
 | 17/11/2026 | Agenda ganhou visões de calendário **Semana** e **Mês** (estilo Google Agenda), além da lista do **Dia** |
+| 17/11/2026 | Mais 56 clientes de exemplo (16 a 28/11) para visualizar a agenda |
 
 ---
 

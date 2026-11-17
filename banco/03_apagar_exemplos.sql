@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Izabelle Lima: apaga SOMENTE os dados de exemplo
--- (20 clientes de 26 a 30/10, 13 materiais e 9 compras colocados em 27/10/2026)
+-- (clientes de 26 a 30/10 e de 16 a 28/11, 13 materiais e 9 compras)
 -- Não mexe em nada que a Izabelle cadastrou de verdade.
 -- Rodar no SQL Editor do Supabase, projeto Data-NTO.
 -- =====================================================================
