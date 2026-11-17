@@ -297,21 +297,25 @@ insert into izabelle.settings (id, data) values (1, '{
   "step": 30, "minNoticeHours": 2, "windowDays": 45
 }'::jsonb);
 
+-- tabela de preços atualizada em 17/11/2026
 insert into izabelle.services (cat, name, price, duration, note, position) values
-  ('sobrancelha', 'Design de sobrancelha', 25, 30, '', 1),
-  ('sobrancelha', 'Design com henna', 45, 45, '', 2),
-  ('sobrancelha', 'Diagnose com tintura', 50, 45, '', 3),
-  ('buco', 'Depilação de buço', 10, 15, '', 4),
-  ('cilios', 'Brasileiro — colocação', 115, 120, '', 5),
-  ('cilios', 'Brasileiro — manutenção', 70, 90, 'Manutenção de 15 a 21 dias', 6),
-  ('cilios', 'Egípcio — colocação', 125, 120, '', 7),
-  ('cilios', 'Egípcio — manutenção', 75, 90, 'Manutenção de 15 a 21 dias', 8),
-  ('cilios', 'Mega (Capping) — colocação', 130, 120, '', 9),
-  ('cilios', 'Mega (Capping) — manutenção', 80, 90, 'Manutenção de 15 a 21 dias', 10),
-  ('cilios', '5D — colocação', 135, 120, '', 11),
-  ('cilios', '5D — manutenção', 85, 90, 'Manutenção de 15 a 21 dias', 12),
-  ('cilios', 'Fox — colocação', 140, 120, '', 13),
-  ('cilios', 'Fox — manutenção', 90, 90, 'Manutenção de 15 a 21 dias', 14);
+  ('sobrancelha', 'Limpeza com micro', 15, 30, '', 1),
+  ('sobrancelha', 'Design personalizado', 25, 30, '', 2),
+  ('sobrancelha', 'Design com henna', 45, 45, '', 3),
+  ('sobrancelha', 'Design com tintura', 50, 45, '', 4),
+  ('sobrancelha', 'Brow lamination sem tintura', 100, 60, '', 5),
+  ('sobrancelha', 'Brow lamination com tintura', 120, 75, '', 6),
+  ('buco', 'Depilação de buço', 12, 15, '', 7),
+  ('cilios', 'Brasileiro — colocação', 120, 120, '', 8),
+  ('cilios', 'Brasileiro — manutenção', 85, 90, 'Manutenção de 15 a 21 dias', 9),
+  ('cilios', 'Egípcio — colocação', 130, 120, '', 10),
+  ('cilios', 'Egípcio — manutenção', 95, 90, 'Manutenção de 15 a 21 dias', 11),
+  ('cilios', 'Mega — colocação', 135, 120, '', 12),
+  ('cilios', 'Mega — manutenção', 100, 90, 'Manutenção de 15 a 21 dias', 13),
+  ('cilios', '5D — colocação', 140, 120, '', 14),
+  ('cilios', '5D — manutenção', 105, 90, 'Manutenção de 15 a 21 dias', 15),
+  ('cilios', 'Fox — colocação', 150, 120, '', 16),
+  ('cilios', 'Fox — manutenção', 110, 90, 'Manutenção de 15 a 21 dias', 17);
 
 -- ---------- expor o schema na API ----------
 -- Mantém os schemas que os outros apps do Data-NTO já usavam e acrescenta "izabelle".

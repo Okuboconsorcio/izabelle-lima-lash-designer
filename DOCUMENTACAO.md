@@ -213,6 +213,7 @@ Eles **contam no financeiro e ocupam horários no site**. Para remover: `banco/0
 | 17/11/2026 | Nicolas@okuboconsorcio.com.br virou dono do painel no Data-NTO; o painel volta sozinho para "Entrar" quando o e-mail já tem conta |
 | 17/11/2026 | Agenda ganhou visões de calendário **Semana** e **Mês** (estilo Google Agenda), além da lista do **Dia** |
 | 17/11/2026 | Mais 56 clientes de exemplo (16 a 28/11) para visualizar a agenda |
+| 17/11/2026 | Tabela de serviços e preços atualizada: novos *Limpeza com micro*, *Brow lamination sem tintura* e *com tintura*; *Design de sobrancelha* virou *Design personalizado*, *Diagnose com tintura* virou *Design com tintura*, *Mega (Capping)* virou *Mega*; novos preços de cílios e buço |
 
 ---
 
@@ -224,7 +225,7 @@ Eles **contam no financeiro e ocupam horários no site**. Para remover: `banco/0
 
 **Antes de divulgar o site:**
 - [ ] Preencher em *Ajustes* o **WhatsApp, endereço e Instagram** da Izabelle.
-- [ ] Conferir **dias, horários** e **durações** dos serviços (as atuais são estimativas).
+- [ ] Conferir **dias e horários** de atendimento e as **durações** dos serviços. Preços e serviços foram atualizados em 17/11/2026; as durações são estimativas: limpeza com micro 30 min, design 30–45 min, brow lamination 60 min (sem tintura) e 75 min (com tintura), buço 15 min, colocação de cílios 2h, manutenção 1h30.
 - [ ] **Apagar os dados de exemplo.**
 
 **Opcionais:**
