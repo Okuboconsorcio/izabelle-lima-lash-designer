@@ -89,7 +89,7 @@ O login é com e-mail e senha. Só quem está na lista de donos (tabela `izabell
 | Tela | O que faz |
 |---|---|
 | **Início** | Faturamento do mês (comparado com o mesmo período do mês anterior), atendimentos de hoje, próximos 7 dias, materiais acabando, agenda do dia e próximos agendamentos |
-| **Agenda** | Semana com a quantidade de clientes por dia; ao tocar no dia: concluir (valor e forma de pagamento), reagendar, cancelar, "não veio", WhatsApp da cliente; novo agendamento manual; bloquear horário/folga; busca por nome ou telefone |
+| **Agenda** | Três visões, escolhidas no botão **Dia, Semana ou Mês** (o painel lembra a última usada):<br>• **Dia:** faixa da semana e a lista do dia, com concluir (valor e forma de pagamento), reagendar, cancelar, "não veio" e WhatsApp da cliente.<br>• **Semana:** grade estilo Google Agenda, com os dias em colunas e os horários na lateral. Cada atendimento é um bloco do tamanho da duração, colorido pelo tipo de serviço (rosa = sobrancelha, roxo = cílios, laranja = buço). Mostra almoço, horários fechados, bloqueios e a linha vermelha da hora atual. Tocar no bloco abre as ações; tocar num espaço vazio abre "Novo agendamento" naquele dia e hora. No celular aparecem 3 dias por vez.<br>• **Mês:** o mês inteiro com os atendimentos de cada dia; tocar no dia abre a visão Dia.<br>Também: novo agendamento manual, bloquear horário ou folga, e busca por nome ou telefone. |
 | **Financeiro** | Entrou, saiu, sobrou (lucro/prejuízo), atendimentos e ticket médio, quanto ainda vai entrar, taxa de faltas. Filtros por período, serviço e pagamento. Gráficos, lista de lançamentos, "Lançar despesa" e "Baixar planilha" (CSV) |
 | **Materiais** | Estoque com aviso de "precisa comprar", botões "Usei" e "Comprei" (a compra soma no estoque e entra no financeiro) e histórico de compras |
 | **Serviços** | Preço, duração e observação; interruptor para mostrar ou esconder no site |
@@ -210,6 +210,7 @@ Eles **contam no financeiro e ocupam horários no site**. Para remover: `banco/0
 | 06/11/2026 | Schema `izabelle` apagado do Moka-pd e retirado da lista de schemas da API de lá; os outros sistemas do Moka-pd seguem funcionando |
 | 06/11/2026 | Código enviado ao GitHub (`Okuboconsorcio/izabelle-lima-lash-designer`) |
 | 17/11/2026 | Nicolas@okuboconsorcio.com.br virou dono do painel no Data-NTO; o painel volta sozinho para "Entrar" quando o e-mail já tem conta |
+| 17/11/2026 | Agenda ganhou visões de calendário **Semana** e **Mês** (estilo Google Agenda), além da lista do **Dia** |
 
 ---
 

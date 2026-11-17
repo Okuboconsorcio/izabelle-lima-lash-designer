@@ -35,6 +35,7 @@
     finAll: false,
     matTab: 'estoque',
     buyPeriod: '3m',
+    agView: (() => { try { const v = localStorage.getItem('il_agview'); return ['dia', 'semana', 'mes'].includes(v) ? v : 'semana'; } catch { return 'semana'; } })(),
   };
   let apptIndex = {};
 
@@ -189,7 +190,10 @@
   window.addEventListener('hashchange', () => { window.scrollTo(0, 0); if (inApp) render(); });
   Store.onChange(() => { if (inApp) render(); });
   let resizeT;
-  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => $$('[data-chart]').forEach(el => el._draw && el._draw()), 150); });
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => {
+    $$('[data-chart]').forEach(el => el._draw && el._draw());
+    if (inApp && location.hash.startsWith('#agenda') && st.agView !== 'dia' && !document.querySelector('.modal-bg')) render();
+  }, 150); });
 
   async function render() {
     const name = (location.hash.slice(1) || 'inicio').split('?')[0];
@@ -259,7 +263,9 @@
 
   document.addEventListener('click', async e => {
     const btn = e.target.closest('[data-act]');
-    if (!btn || !$('#view').contains(btn)) return;
+    if (!btn || !($('#view').contains(btn) || btn.closest('.modal-bg'))) return;
+    const holder = btn.closest('.modal-bg');
+    if (holder) holder.remove();
     const id = btn.dataset.id;
     const a = apptIndex[id];
     switch (btn.dataset.act) {
@@ -370,7 +376,7 @@
     });
   }
 
-  async function newApptModal(date = st.date) {
+  async function newApptModal(date = st.date, presetTime = '') {
     const services = await Store.services({ all: true });
     UI.modal('Novo agendamento', 'Para quando a cliente marcar por telefone, WhatsApp ou pessoalmente.', (body, close) => {
       const sel = { time: null };
@@ -397,6 +403,11 @@
           $$('#n-slots .slot', body).forEach(x => x.classList.remove('selected'));
           b.classList.add('selected'); sel.time = b.dataset.t; $('#n-time', body).value = '';
         });
+        if (presetTime) {
+          const chip = $$('#n-slots .slot', body).find(x => x.dataset.t === presetTime);
+          if (chip) chip.click(); else $('#n-time', body).value = presetTime;
+          presetTime = '';
+        }
       };
       $('#n-svc', body).onchange = refresh;
       $('#n-date', body).onchange = refresh;
@@ -498,66 +509,223 @@
   /* =========================================================
      AGENDA
      ========================================================= */
+  const AG_VIEWS = [['dia', 'Dia'], ['semana', 'Semana'], ['mes', 'Mês']];
+  const isNarrow = () => window.innerWidth < 700;
+  const setAgView = v => { st.agView = v; try { localStorage.setItem('il_agview', v); } catch { } };
+
   async function vAgenda() {
     const d = st.date;
-    const dow = (U.weekday(d) + 6) % 7; // segunda = 0
-    const weekStart = U.addDays(d, -dow);
+    const view = st.agView;
     const s = await Store.settings();
-    const weekAppts = await Store.appointments({ from: weekStart, to: U.addDays(weekStart, 6) });
-    const dayAppts = weekAppts.filter(a => a.date === d && (st.showCancelled || a.status !== 'cancelado'));
-    const blocks = await Store.blocks(d);
-    const active = dayAppts.filter(a => a.status !== 'cancelado' && a.status !== 'faltou');
-    const free = await adminSlots(d, Number(s.step) || 30);
-    const wk = U.parseDate(weekStart);
-
-    const items = [...dayAppts.map(a => ({ t: a.time, html: apptCard(a) })), ...blocks.map(b => ({ t: b.start, html: blockCard(b) }))]
-      .sort((x, y) => x.t.localeCompare(y.t));
-    const hours = s.hours[U.weekday(d)];
+    const step = view === 'semana' && isNarrow() ? 3 : 7;
+    const ref = U.parseDate(view === 'mes' ? monthStart(d) : view === 'semana' && !isNarrow() ? U.addDays(d, -((U.weekday(d) + 6) % 7)) : d);
+    const sub = { dia: 'Toque em um dia para ver os atendimentos.', semana: 'Toque num atendimento para ver as ações, ou num espaço vazio para agendar.', mes: 'Toque num dia para ver os detalhes.' }[view];
 
     $('#view').innerHTML = `
       <div class="head">
-        <div><h1>Agenda</h1><p>Toque em um dia para ver os atendimentos.</p></div>
+        <div><h1>Agenda</h1><p>${sub}</p></div>
         <div class="head-actions">
           <button class="btn" id="a-block">${I.ban} Bloquear horário</button>
           <button class="btn btn-primary" id="a-new">${I.plus} Novo agendamento</button>
         </div>
       </div>
       <div class="week-nav">
-        <button class="btn btn-sm" data-w="-7" aria-label="Semana anterior">‹</button>
+        <div class="seg" role="tablist" aria-label="Tipo de visualização">${AG_VIEWS.map(([k, v]) => `<button role="tab" aria-selected="${view === k}" class="${view === k ? 'on' : ''}" data-view="${k}">${v}</button>`).join('')}</div>
+        <button class="btn btn-sm" data-w="-1" aria-label="Anterior">‹</button>
         <button class="btn btn-sm" data-w="0">Hoje</button>
-        <button class="btn btn-sm" data-w="7" aria-label="Próxima semana">›</button>
-        <span class="label">${U.MONTHS[wk.getMonth()]} ${wk.getFullYear()}</span>
+        <button class="btn btn-sm" data-w="1" aria-label="Próximo">›</button>
+        <span class="label">${U.MONTHS[ref.getMonth()]} ${ref.getFullYear()}</span>
         <input type="date" class="input" id="a-jump" value="${d}" style="width:auto;padding:.35rem .6rem;font-size:.85rem" aria-label="Ir para a data">
         <div class="search" style="margin-left:auto"><input class="input" id="a-search" placeholder="Buscar cliente…" value="${U.esc(st.search)}"></div>
       </div>
       <div id="a-results"></div>
-      <div id="a-day">
-        <div class="week">${Array.from({ length: 7 }, (_, i) => {
-          const ds = U.addDays(weekStart, i);
-          const n = weekAppts.filter(a => a.date === ds && a.status !== 'cancelado' && a.status !== 'faltou').length;
-          const closed = !s.hours[U.weekday(ds)].on;
-          return `<button class="wd ${ds === d ? 'sel' : ''} ${ds === today() ? 'today' : ''} ${closed ? 'closed' : ''}" data-d="${ds}">
-            <small>${U.WEEKDAYS_SHORT[U.weekday(ds)]}</small><strong>${Number(ds.slice(8))}</strong>
-            <span class="count">${closed ? 'fechado' : n ? `${n} ${n > 1 ? 'clientes' : 'cliente'}` : ''}</span></button>`;
-        }).join('')}</div>
-        <div class="day-info">
-          <div><h2>${U.longDate(d)}</h2>
-            <span class="tiny muted">${hours.on ? `Atendimento das ${hours.open} às ${hours.close}` : 'Dia sem atendimento'} · ${active.length} ${active.length === 1 ? 'atendimento' : 'atendimentos'} · ${U.money(sum(active, a => a.status === 'concluido' ? a.paid : a.status === 'agendado' ? a.price : 0))}${hours.on && d >= today() ? ` · ${free.length} horários livres` : ''}</span></div>
-          <label class="toggle-line"><input type="checkbox" id="a-cancel" ${st.showCancelled ? 'checked' : ''}> Mostrar cancelados</label>
-        </div>
-        <div class="appts">${items.length ? items.map(x => x.html).join('') : `<div class="card empty">Nenhum atendimento neste dia.<br><br><button class="btn btn-sm btn-primary" id="a-new2">${I.plus} Agendar alguém</button></div>`}</div>
-      </div>`;
+      <div id="a-day"></div>`;
 
-    $$('[data-w]').forEach(b => b.onclick = () => { st.date = b.dataset.w === '0' ? today() : U.addDays(st.date, Number(b.dataset.w)); render(); });
-    $$('.wd').forEach(b => b.onclick = () => { st.date = b.dataset.d; render(); });
+    $$('[data-view]').forEach(b => b.onclick = () => { setAgView(b.dataset.view); render(); });
+    $$('[data-w]').forEach(b => b.onclick = () => {
+      const n = Number(b.dataset.w);
+      st.date = n === 0 ? today() : view === 'mes' ? shiftMonth(st.date, n) : U.addDays(st.date, n * step);
+      render();
+    });
     $('#a-jump').onchange = e => { if (e.target.value) { st.date = e.target.value; render(); } };
-    $('#a-cancel').onchange = e => { st.showCancelled = e.target.checked; render(); };
     $('#a-new').onclick = () => newApptModal(d);
     $('#a-block').onclick = () => blockModal(d);
-    if ($('#a-new2')) $('#a-new2').onclick = () => newApptModal(d);
     const search = $('#a-search');
     search.oninput = () => { st.search = search.value; renderSearch(); };
+
+    const box = $('#a-day');
+    if (view === 'semana') await renderWeek(box, s);
+    else if (view === 'mes') await renderMonth(box, s);
+    else await renderDay(box, s);
     renderSearch();
+  }
+
+  /* ---------- Dia: faixa da semana + lista ---------- */
+  async function renderDay(box, s) {
+    const d = st.date;
+    const weekStart = U.addDays(d, -((U.weekday(d) + 6) % 7));
+    const weekAppts = await Store.appointments({ from: weekStart, to: U.addDays(weekStart, 6) });
+    const dayAppts = weekAppts.filter(a => a.date === d && (st.showCancelled || a.status !== 'cancelado'));
+    const blocks = await Store.blocks(d);
+    const active = dayAppts.filter(a => a.status !== 'cancelado' && a.status !== 'faltou');
+    const free = await adminSlots(d, Number(s.step) || 30);
+    const items = [...dayAppts.map(a => ({ t: a.time, html: apptCard(a) })), ...blocks.map(b => ({ t: b.start, html: blockCard(b) }))]
+      .sort((x, y) => x.t.localeCompare(y.t));
+    const hours = s.hours[U.weekday(d)];
+
+    box.innerHTML = `
+      <div class="week">${Array.from({ length: 7 }, (_, i) => {
+        const ds = U.addDays(weekStart, i);
+        const n = weekAppts.filter(a => a.date === ds && a.status !== 'cancelado' && a.status !== 'faltou').length;
+        const closed = !s.hours[U.weekday(ds)].on;
+        return `<button class="wd ${ds === d ? 'sel' : ''} ${ds === today() ? 'today' : ''} ${closed ? 'closed' : ''}" data-d="${ds}">
+          <small>${U.WEEKDAYS_SHORT[U.weekday(ds)]}</small><strong>${Number(ds.slice(8))}</strong>
+          <span class="count">${closed ? 'fechado' : n ? `${n} ${n > 1 ? 'clientes' : 'cliente'}` : ''}</span></button>`;
+      }).join('')}</div>
+      <div class="day-info">
+        <div><h2>${U.longDate(d)}</h2>
+          <span class="tiny muted">${hours.on ? `Atendimento das ${hours.open} às ${hours.close}` : 'Dia sem atendimento'} · ${active.length} ${active.length === 1 ? 'atendimento' : 'atendimentos'} · ${U.money(sum(active, a => a.status === 'concluido' ? a.paid : a.status === 'agendado' ? a.price : 0))}${hours.on && d >= today() ? ` · ${free.length} horários livres` : ''}</span></div>
+        <label class="toggle-line"><input type="checkbox" id="a-cancel" ${st.showCancelled ? 'checked' : ''}> Mostrar cancelados</label>
+      </div>
+      <div class="appts">${items.length ? items.map(x => x.html).join('') : `<div class="card empty">Nenhum atendimento neste dia.<br><br><button class="btn btn-sm btn-primary" id="a-new2">${I.plus} Agendar alguém</button></div>`}</div>`;
+
+    $$('.wd', box).forEach(b => b.onclick = () => { st.date = b.dataset.d; render(); });
+    $('#a-cancel', box).onchange = e => { st.showCancelled = e.target.checked; render(); };
+    if ($('#a-new2', box)) $('#a-new2', box).onclick = () => newApptModal(d);
+  }
+
+  /* legenda de cores por tipo de serviço (a cor nunca é o único sinal: o nome do serviço vai escrito no bloco) */
+  const calLegend = () => `<div class="wk-legend">
+    ${Store.CATEGORIES.map(c => `<span><i class="cat-${c.id}"></i>${c.name}</span>`).join('')}
+    <span>✓ realizado</span><span class="leg-faltou">não veio</span>
+  </div>`;
+
+  /* ---------- Semana: grade de horários estilo Google Agenda ---------- */
+  async function renderWeek(box, s) {
+    const n = isNarrow() ? 3 : 7;
+    const first = n === 7 ? U.addDays(st.date, -((U.weekday(st.date) + 6) % 7)) : st.date;
+    const days = Array.from({ length: n }, (_, i) => U.addDays(first, i));
+    const last = days[n - 1];
+    const appts = (await Store.appointments({ from: first, to: last })).filter(a => a.status !== 'cancelado');
+    const blocks = (await Store.blocks()).filter(b => b.date >= first && b.date <= last);
+
+    // faixa de horas: do primeiro horário de abertura ao último de fechamento (e o que mais tiver agendado)
+    let lo = 24 * 60, hi = 0;
+    days.forEach(ds => { const h = s.hours[U.weekday(ds)]; if (h.on) { lo = Math.min(lo, U.toMin(h.open)); hi = Math.max(hi, U.toMin(h.close)); } });
+    appts.forEach(a => { const t = U.toMin(a.time); lo = Math.min(lo, t); hi = Math.max(hi, t + a.duration); });
+    if (lo >= hi) { lo = 8 * 60; hi = 19 * 60; }
+    lo = Math.floor(lo / 60) * 60;
+    hi = Math.ceil(hi / 60) * 60;
+    const PX = 1; // pixels por minuto (60px por hora)
+    const H = (hi - lo) * PX;
+    const y = m => (m - lo) * PX;
+    const band = (cls, a, b, label = '') => (b > a ? `<div class="${cls}" style="top:${y(a)}px;height:${(b - a) * PX}px">${label}</div>` : '');
+    const nowMin = U.nowMin();
+
+    const hoursHtml = Array.from({ length: (hi - lo) / 60 }, (_, i) => `<span style="top:${i * 60 * PX}px">${U.toTime(lo + i * 60)}</span>`).join('');
+
+    const cols = days.map(ds => {
+      const h = s.hours[U.weekday(ds)];
+      let inner = '';
+      if (!h.on) inner += band('wk-off', lo, hi, '<span>Fechado</span>');
+      else {
+        inner += band('wk-off', lo, Math.max(lo, U.toMin(h.open)));
+        inner += band('wk-off', Math.min(hi, U.toMin(h.close)), hi);
+        if (s.lunch.on) inner += band('wk-lunch', Math.max(lo, U.toMin(s.lunch.start)), Math.min(hi, U.toMin(s.lunch.end)), '<span>Almoço</span>');
+      }
+      blocks.filter(b => b.date === ds).forEach(b => {
+        const a0 = Math.max(lo, U.toMin(b.start)), b0 = Math.min(hi, U.toMin(b.end));
+        if (b0 > a0) inner += `<button class="wk-block" data-block="${b.id}" style="top:${y(a0)}px;height:${(b0 - a0) * PX}px" title="Horário bloqueado">${I.ban}<span>${U.esc(b.reason || 'Bloqueado')}</span></button>`;
+      });
+      appts.filter(a => a.date === ds).forEach(a => {
+        apptIndex[a.id] = a;
+        const t = U.toMin(a.time);
+        const hgt = Math.max(20, a.duration * PX - 2);
+        const short = hgt < 44;
+        const end = U.toTime(t + a.duration);
+        inner += `<button class="wk-ev cat-${a.cat} st-${a.status}" data-ev="${a.id}" style="top:${y(t) + 1}px;height:${hgt}px"
+            title="${U.esc(`${a.time}–${end} · ${a.client} · ${a.serviceName} · ${Store.STATUS[a.status]}`)}">
+          <span class="wk-ev-t">${a.status === 'concluido' ? '✓ ' : ''}${a.time}${short ? ` · ${U.esc(firstName(a.client))}` : `–${end}`}</span>
+          ${short ? '' : `<span class="wk-ev-n">${U.esc(a.client)}</span><span class="wk-ev-s">${U.esc(a.serviceName)}</span>`}
+        </button>`;
+      });
+      if (ds === today() && nowMin >= lo && nowMin <= hi) inner += `<div class="wk-now" style="top:${y(nowMin)}px"></div>`;
+      return `<div class="wk-col ${ds === today() ? 'today' : ''} ${ds < today() ? 'past' : ''}" data-d="${ds}" style="height:${H}px">${inner}</div>`;
+    }).join('');
+
+    const head = days.map(ds => {
+      const cnt = appts.filter(a => a.date === ds && a.status !== 'faltou').length;
+      return `<button class="wk-dh ${ds === today() ? 'today' : ''}" data-goto="${ds}" title="Ver o dia em lista">
+        <small>${U.WEEKDAYS_SHORT[U.weekday(ds)]}</small><strong>${Number(ds.slice(8))}</strong>${cnt ? `<em>${cnt}</em>` : ''}</button>`;
+    }).join('');
+
+    box.innerHTML = `
+      ${calLegend()}
+      <div class="wk" style="--cols:${n}">
+        <div class="wk-head"><span></span>${head}</div>
+        <div class="wk-body"><div class="wk-hours" style="height:${H}px">${hoursHtml}</div>${cols}</div>
+      </div>`;
+
+    $$('.wk-ev', box).forEach(b => b.onclick = e => { e.stopPropagation(); apptDetailModal(apptIndex[b.dataset.ev]); });
+    $$('.wk-block', box).forEach(b => b.onclick = async e => {
+      e.stopPropagation();
+      if (!await UI.confirm('Liberar este horário?', 'O bloqueio sai e o horário volta a aparecer para as clientes.', 'Liberar')) return;
+      await Store.removeBlock(b.dataset.block); UI.toast('Horário liberado.'); render();
+    });
+    $$('.wk-dh', box).forEach(b => b.onclick = () => { st.date = b.dataset.goto; setAgView('dia'); render(); });
+    $$('.wk-col', box).forEach(col => col.onclick = e => {
+      if (col.dataset.d < today()) return UI.toast('Esse dia já passou.');
+      const stepMin = Number(s.step) || 30;
+      const m = lo + (e.clientY - col.getBoundingClientRect().top) / PX;
+      const snapped = Math.min(hi - stepMin, Math.max(lo, Math.floor(m / stepMin) * stepMin));
+      newApptModal(col.dataset.d, U.toTime(snapped));
+    });
+  }
+
+  /* ---------- Mês ---------- */
+  async function renderMonth(box, s) {
+    const m0 = monthStart(st.date), m1 = monthEnd(st.date);
+    const gridStart = U.addDays(m0, -((U.weekday(m0) + 6) % 7));
+    const gridEnd = U.addDays(m1, 6 - ((U.weekday(m1) + 6) % 7));
+    const appts = (await Store.appointments({ from: gridStart, to: gridEnd })).filter(a => a.status !== 'cancelado');
+    const max = isNarrow() ? 2 : 3;
+    const inMonth = appts.filter(a => a.date >= m0 && a.date <= m1 && a.status !== 'faltou');
+
+    const cells = [];
+    for (let ds = gridStart; ds <= gridEnd; ds = U.addDays(ds, 1)) {
+      const list = appts.filter(a => a.date === ds);
+      list.forEach(a => { apptIndex[a.id] = a; });
+      cells.push(`<div class="mo-cell ${ds < m0 || ds > m1 ? 'out' : ''} ${ds === today() ? 'today' : ''} ${s.hours[U.weekday(ds)].on ? '' : 'closed'}" data-d="${ds}" role="button" tabindex="0" aria-label="${U.longDate(ds)}: ${list.length} atendimentos">
+        <span class="mo-n">${Number(ds.slice(8))}</span>
+        ${list.slice(0, max).map(a => `<button class="mo-ev cat-${a.cat} st-${a.status}" data-ev="${a.id}" title="${U.esc(`${a.time} · ${a.client} · ${a.serviceName}`)}">${a.status === 'concluido' ? '✓' : ''}${a.time} ${isNarrow() ? '' : U.esc(firstName(a.client))}</button>`).join('')}
+        ${list.length > max ? `<span class="mo-more">+${list.length - max} mais</span>` : ''}
+      </div>`);
+    }
+
+    box.innerHTML = `
+      ${calLegend()}
+      <p class="tiny muted" style="margin:0 0 .6rem">${inMonth.length} ${inMonth.length === 1 ? 'atendimento' : 'atendimentos'} em ${U.MONTHS[U.parseDate(m0).getMonth()]} · ${U.money(sum(inMonth, a => a.status === 'concluido' ? a.paid : a.price))}</p>
+      <div class="mo">
+        ${['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map(w => `<span class="mo-wd">${w}</span>`).join('')}
+        ${cells.join('')}
+      </div>`;
+
+    $$('.mo-ev', box).forEach(b => b.onclick = e => { e.stopPropagation(); apptDetailModal(apptIndex[b.dataset.ev]); });
+    $$('.mo-cell', box).forEach(c => {
+      const go = () => { st.date = c.dataset.d; setAgView('dia'); render(); };
+      c.onclick = go;
+      c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    });
+  }
+
+  /* detalhes de um atendimento (abre ao tocar no bloco do calendário) */
+  function apptDetailModal(a) {
+    if (!a) return;
+    UI.modal(a.client, `${U.longDate(a.date)} · ${a.time} às ${U.toTime(U.toMin(a.time) + a.duration)}`, (body, close) => {
+      body.innerHTML = `<div class="appts">${apptCard(a)}</div>
+        <div class="modal-actions"><button class="btn btn-ghost" data-x>Fechar</button></div>`;
+      $('[data-x]', body).onclick = close;
+    });
   }
 
   async function renderSearch() {
