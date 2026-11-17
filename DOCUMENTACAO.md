@@ -1,6 +1,6 @@
 # Izabelle Lima: site de agendamento e painel de gestão
 
-Documentação completa do projeto. Última atualização: 06/11/2026.
+Documentação completa do projeto. Última atualização: 17/11/2026.
 
 ---
 
@@ -13,7 +13,7 @@ Documentação completa do projeto. Última atualização: 06/11/2026.
 | Código-fonte | GitHub: https://github.com/Okuboconsorcio/izabelle-lima-lash-designer (cópia de trabalho nesta pasta do OneDrive) |
 | Hospedagem do site | Vercel, projeto `izabelle-lima`, equipe *okuboconsorcios-projects* |
 | Banco de dados | Supabase, projeto **Data-NTO** (`dkwtidhcuvrdzfcewfoz`, São Paulo), schema `izabelle` |
-| Dono do painel | Ainda não definido no Data-NTO: a primeira conta criada no painel vira dona (ver seção 10) |
+| Dono do painel | Nicolas@okuboconsorcio.com.br (mesmo login do bolso-financas e dos outros sistemas do Data-NTO) |
 | SQL do banco | Pasta `banco/` (ao lado desta documentação) |
 
 ---
@@ -133,7 +133,8 @@ O login é com e-mail e senha. Só quem está na lista de donos (tabela `izabell
 
 1. **O login é compartilhado com os outros sistemas do Data-NTO.** Na prática:
    - ter conta no Data-NTO **não** dá acesso ao painel: é preciso estar em `izabelle.admins`;
-   - **enquanto não houver dono**, qualquer conta do Data-NTO que entrar no painel vira dona; por isso, crie a sua logo (seção 10);
+   - o dono já está definido (17/11/2026); novas pessoas só entram se forem liberadas pelo `banco/04_trocar_dono_do_painel.sql`;
+   - trocar a senha no painel troca também a senha dos outros sistemas que usam a mesma conta;
    - "Criar conta" com um e-mail que já existe no Data-NTO não cria nada e não manda e-mail (o painel avisa).
 2. **Lista de schemas da API.** O `izabelle` foi incluído em Supabase (Data-NTO) → *Settings → API → Exposed schemas*, junto com `public`, `graphql_public` e `financeiro_nick`. **Se alguém tirar o `izabelle` dessa lista, o site para de carregar.**
 3. **"Esqueci a senha" e confirmação de e-mail.** Para os links do e-mail voltarem ao painel, `https://izabelle-lima.vercel.app/**` precisa estar em Supabase (Data-NTO) → *Authentication → URL Configuration → Redirect URLs*.
@@ -208,13 +209,14 @@ Eles **contam no financeiro e ocupam horários no site**. Para remover: `banco/0
 | 06/11/2026 | **Migração para o projeto Data-NTO:** estrutura recriada, dados copiados com os mesmos identificadores e conferidos (impressão digital idêntica em todas as tabelas), regras e segurança testadas, site republicado apontando para o Data-NTO |
 | 06/11/2026 | Schema `izabelle` apagado do Moka-pd e retirado da lista de schemas da API de lá; os outros sistemas do Moka-pd seguem funcionando |
 | 06/11/2026 | Código enviado ao GitHub (`Okuboconsorcio/izabelle-lima-lash-designer`) |
+| 17/11/2026 | Nicolas@okuboconsorcio.com.br virou dono do painel no Data-NTO; o painel volta sozinho para "Entrar" quando o e-mail já tem conta |
 
 ---
 
 ## 10. Pendências e próximos passos
 
 **Urgentes (por causa da migração):**
-- [ ] **Criar a conta de dono no Data-NTO:** abra o painel, clique em "Primeiro acesso? Criar conta", confirme pelo e-mail e entre. A primeira conta que entrar vira dona. As contas do Moka-pd **não** valem no Data-NTO.
+- [x] Conta de dono no Data-NTO: Nicolas@okuboconsorcio.com.br (17/11/2026).
 - [ ] Adicionar `https://izabelle-lima.vercel.app/**` em Data-NTO → *Authentication → URL Configuration → Redirect URLs*.
 
 **Antes de divulgar o site:**
