@@ -160,7 +160,11 @@
           if (!logged) { UI.toast('Conta criada! Confirme pelo link que enviamos para seu e-mail e depois entre aqui.'); setSignup(false); return; }
         } else await Store.auth.signIn(email, pw);
         await enterRemote();
-      } catch (err) { UI.toast(err.message, 'error'); }
+      } catch (err) {
+        UI.toast(err.message, 'error');
+        // e-mail já cadastrado: volta para "Entrar" com o e-mail preenchido, é só pôr a senha certa
+        if (signupMode && /já tem conta/.test(err.message)) { setSignup(false); $('#pin').value = ''; $('#pin').focus(); }
+      }
       finally { btn.disabled = false; }
       return;
     }
